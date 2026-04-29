@@ -1,0 +1,74 @@
+create database capstone;
+use capstone;
+show tables;
+
+-- Relevant EDA 
+  
+-- 1.Row Counts (Data Volume)
+SELECT 'Customers' AS Table_Name, COUNT(*) AS Total_Rows FROM Customers
+UNION ALL
+SELECT 'Orders', COUNT(*) FROM Orders
+UNION ALL
+SELECT 'Restaurants', COUNT(*) FROM Restaurants;
+
+-- 2.Previewing Data
+SELECT * FROM Orders LIMIT 5;
+
+-- 3.Checking for Missing Values
+SELECT COUNT(*) AS Missing_Ratings
+FROM Orders
+WHERE rating IS NULL;
+
+-- 4.Unique Entity Discovery
+SELECT COUNT(DISTINCT city) AS unique_cities, 
+       COUNT(DISTINCT cuisine_type) AS unique_cuisines 
+FROM Restaurants;
+
+-- 5.Summary Statistics for Revenue
+SELECT MIN(order_value) AS min_order, 
+       MAX(order_value) AS max_order, 
+       AVG(order_value) AS avg_order 
+FROM Orders;
+
+-- 6.Date Range Profiling
+SELECT MIN(order_date) AS data_start, 
+       MAX(order_date) AS data_end 
+FROM Orders;
+
+-- 7.Frequency Distribution (Order Status)
+SELECT order_status, COUNT(*) AS count
+FROM Orders
+GROUP BY order_status;
+
+-- 8.Categorical Ranking (Top Cuisines)
+SELECT cuisine_type, COUNT(*) AS restaurant_count
+FROM Restaurants
+GROUP BY cuisine_type
+ORDER BY restaurant_count DESC;
+
+-- 9.Geographic Concentration
+SELECT city, COUNT(*) AS customer_count
+FROM Customers
+GROUP BY city
+ORDER BY customer_count DESC;
+
+-- 10. Outlier Detection (Quick Check)
+SELECT order_id, prep_time, delivery_time
+FROM Orders
+ORDER BY delivery_time DESC
+LIMIT 10;
+
+-- Total orders per city 
+SELECT c.city, COUNT(o.order_id) AS order_count
+FROM Orders o JOIN Customers c ON o.customer_id = c.customer_id
+GROUP BY c.city ORDER BY order_count DESC;
+
+-- Peak order hours 
+SELECT DAYNAME(order_date) AS day_name, COUNT(*) AS order_count
+FROM Orders GROUP BY day_name ORDER BY order_count DESC;
+
+-- Revenue per restaurant
+SELECT r.restaurant_name, SUM(o.order_value) AS total_revenue
+FROM Orders o JOIN Restaurants r ON o.restaurant_id = r.restaurant_id
+WHERE o.order_status = 'Delivered'
+GROUP BY r.restaurant_name ORDER BY total_revenue DESC;
